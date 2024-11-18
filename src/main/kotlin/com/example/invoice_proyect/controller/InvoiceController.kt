@@ -8,6 +8,8 @@ import com.example.invoice_proyect.service.InvoiceService
 import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.context.MessageSourceAutoConfiguration
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -43,13 +45,13 @@ class InvoiceController {
         }
     }
 
-    @PostMapping("/{id}")
-    fun create(@RequestBody @Valid invoiceDto: InvoiceDto, @PathVariable id: String): Any {
+    @PostMapping()
+    fun create(@RequestBody @Valid invoiceDto: InvoiceDto): ResponseEntity<Any>{
         return try {
             val invoice = invoiceService.save(invoiceDto)
-            SuccessResponse(data = invoice)
+            ResponseEntity(SuccessResponse(data = invoice), HttpStatus.CREATED)
         } catch (e: Exception) {
-            ErrorResponse(message = "Error al crear una invoice", code = 500)
+            ResponseEntity(ErrorResponse(message = "Error al crear una invoice", code = 500), HttpStatus.INTERNAL_SERVER_ERROR)
         }
     }
 

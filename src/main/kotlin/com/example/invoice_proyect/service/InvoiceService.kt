@@ -2,6 +2,7 @@ package com.example.invoice_proyect.service
 
 import com.example.invoice_proyect.dto.InvoiceDto
 import com.example.invoice_proyect.mapper.InvoiceMapper
+import com.example.invoice_proyect.repository.ClientRepository
 import com.example.invoice_proyect.repository.InvoiceRepository
 import jakarta.persistence.EntityNotFoundException
 import org.springframework.beans.factory.annotation.Autowired
@@ -9,6 +10,9 @@ import org.springframework.stereotype.Service
 
 @Service
 class InvoiceService {
+
+    @Autowired
+    private lateinit var clientRepository: ClientRepository
 
     @Autowired
 
@@ -31,7 +35,9 @@ class InvoiceService {
     }
 
     fun save (invoiceDto: InvoiceDto): InvoiceDto {
-        val invoice = invoiceMapper.toEntity(invoiceDto)
+        val client = clientRepository.findById(invoiceDto.clientId!!)
+            .orElseThrow { EntityNotFoundException("Client not found with id: ${invoiceDto.clientId}") }
+        val invoice = invoiceMapper.toEntity(invoiceDto, client)
         val savedInvoice = invoiceRepository.save(invoice)
         return invoiceMapper.toDto(savedInvoice)
     }
@@ -40,7 +46,6 @@ class InvoiceService {
         val invoice = invoiceRepository.findById(id)
             .orElseThrow { EntityNotFoundException("Invoice not found with id $id ")}
         invoice.code = invoiceDto.code
-        invoice.createdAt = invoiceDto.createdAt
         invoice.total = invoiceDto.total
         val updateInvoice = invoiceRepository.save(invoice)
         return invoiceMapper.toDto(updateInvoice)

@@ -1,5 +1,4 @@
 package com.example.invoice_proyect.controller
-
 import com.example.invoice_proyect.dto.ClientDto
 import com.example.invoice_proyect.response.ErrorResponse
 import com.example.invoice_proyect.response.FailResponse
@@ -7,6 +6,8 @@ import com.example.invoice_proyect.response.SuccessResponse
 import com.example.invoice_proyect.service.ClientService
 import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -17,9 +18,15 @@ class ClientController {
     lateinit var clientService: ClientService
 
     @GetMapping
-    fun getAllClient(): SuccessResponse {
-        val clients = clientService.getAllClient()
-        return SuccessResponse(data = clients)
+    fun getAllClient(): ResponseEntity<Any>{
+        return try {
+            val client = clientService.getAllClient()
+            client?.let {
+                ResponseEntity(SuccessResponse(data = client), HttpStatus.OK)
+            }?: ResponseEntity(FailResponse(data = "Clientes no encontrados"), HttpStatus.NOT_FOUND)
+        } catch (e: Exception){
+            ResponseEntity(ErrorResponse(message = "Erro al ontener los clientes" , code = 500), HttpStatus.INTERNAL_SERVER_ERROR)
+        }
     }
 
     @GetMapping("/{id}")

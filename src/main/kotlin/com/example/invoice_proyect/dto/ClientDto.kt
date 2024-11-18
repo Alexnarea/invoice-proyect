@@ -4,6 +4,9 @@ import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 
 class ClientDto {
+
+    var id: Long? = null
+
     @NotNull(message = "Name is required")
     @NotBlank(message = "Name cannot be blank")
     var fullName: String? = null

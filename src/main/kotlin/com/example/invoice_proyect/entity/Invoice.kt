@@ -16,9 +16,9 @@ class Invoice {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     var id: Long? = null
-    @Column(name = "name")
+    @Column(name = "code")
     var code: String? = null
-    var createdAt: LocalDate? = null
+    var createdAt: LocalDate? = LocalDate.now()
     var total: Double? = null
     @ManyToOne
     @JoinColumn(name = "client_id")

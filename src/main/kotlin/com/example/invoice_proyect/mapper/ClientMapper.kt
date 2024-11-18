@@ -15,10 +15,11 @@ object ClientMapper {
     }
 
     fun toDto(client: Client): ClientDto {
-        val cientDto = ClientDto()
-        cientDto.fullName = client.fullName
-        cientDto.age = client.age
-        cientDto.address = client.address
-        return cientDto
+        val clientDto = ClientDto()
+        clientDto.id = client.id
+        clientDto.fullName = client.fullName
+        clientDto.age = client.age
+        clientDto.address = client.address
+        return clientDto
     }
 }
