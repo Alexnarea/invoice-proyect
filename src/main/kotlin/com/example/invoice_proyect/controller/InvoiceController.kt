@@ -5,9 +5,9 @@ import com.example.invoice_proyect.response.ErrorResponse
 import com.example.invoice_proyect.response.FailResponse
 import com.example.invoice_proyect.response.SuccessResponse
 import com.example.invoice_proyect.service.InvoiceService
+import jakarta.persistence.EntityNotFoundException
 import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.autoconfigure.context.MessageSourceAutoConfiguration
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -27,51 +27,66 @@ class InvoiceController {
     @Autowired
     lateinit var invoiceService: InvoiceService
 
+    // Obtener todas las facturas
     @GetMapping
-    fun getAllInvoice(): SuccessResponse {
-        val invoices = invoiceService.getAllInvoices()
-        return SuccessResponse(data = invoices)
-    }
-
-    @GetMapping("/{id}")
-    fun getInvoiceById(@PathVariable id: Long): Any {
+    fun getAllInvoices(): ResponseEntity<Any> {
         return try {
-            val invoice = invoiceService.getInvoiceById(id)
-            invoice?.let {
-                SuccessResponse(data = invoice)
-            } ?: FailResponse(data = "Trabajador no encontrado")
+            val invoices = invoiceService.findAll()
+            ResponseEntity(SuccessResponse(data = invoices), HttpStatus.OK)
         } catch (e: Exception) {
-            ErrorResponse(message = "Error al ontener una invoice", code = 500)
+            ResponseEntity(ErrorResponse(message = "Error al obtener las facturas", code = 500), HttpStatus.INTERNAL_SERVER_ERROR)
         }
     }
 
-    @PostMapping()
-    fun create(@RequestBody @Valid invoiceDto: InvoiceDto): ResponseEntity<Any>{
+    // Obtener una factura por ID
+    @GetMapping("/{id}")
+    fun getInvoiceById(@PathVariable id: Long): ResponseEntity<Any> {
+        return try {
+            val invoice = invoiceService.findById(id)
+            ResponseEntity(SuccessResponse(data = invoice), HttpStatus.OK)
+        } catch (e: EntityNotFoundException) {
+            ResponseEntity(FailResponse(data = e.message ?: "Factura no encontrada"), HttpStatus.NOT_FOUND)
+        } catch (e: Exception) {
+            ResponseEntity(ErrorResponse(message = "Error al obtener la factura", code = 500), HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+    }
+
+    // Crear una nueva factura
+    @PostMapping
+    fun createInvoice(@RequestBody @Valid invoiceDto: InvoiceDto): ResponseEntity<Any> {
         return try {
             val invoice = invoiceService.save(invoiceDto)
             ResponseEntity(SuccessResponse(data = invoice), HttpStatus.CREATED)
+        } catch (e: EntityNotFoundException) {
+            ResponseEntity(FailResponse(data = e.message ?: "Cliente no encontrado"), HttpStatus.NOT_FOUND)
         } catch (e: Exception) {
-            ResponseEntity(ErrorResponse(message = "Error al crear una invoice", code = 500), HttpStatus.INTERNAL_SERVER_ERROR)
+            ResponseEntity(ErrorResponse(message = "Error al crear la factura", code = 500), HttpStatus.INTERNAL_SERVER_ERROR)
         }
     }
 
+    // Actualizar una factura existente
     @PutMapping("/{id}")
-    fun update(@PathVariable id: Long, @RequestBody @Valid invoiceDto: InvoiceDto): Any {
+    fun updateInvoice(@PathVariable id: Long, @RequestBody @Valid invoiceDto: InvoiceDto): ResponseEntity<Any> {
         return try {
-            val invoice = invoiceService.updateInvoice(id, invoiceDto)
-            SuccessResponse(data = invoice)
-        }catch (e: Exception){
-            ErrorResponse(message = "Error al actualizar el invoice", code = 500)
+            val updatedInvoice = invoiceService.updateInvoice(id, invoiceDto)
+            ResponseEntity(SuccessResponse(data = updatedInvoice), HttpStatus.OK)
+        } catch (e: EntityNotFoundException) {
+            ResponseEntity(FailResponse(data = e.message ?: "Factura no encontrada"), HttpStatus.NOT_FOUND)
+        } catch (e: Exception) {
+            ResponseEntity(ErrorResponse(message = "Error al actualizar la factura", code = 500), HttpStatus.INTERNAL_SERVER_ERROR)
         }
     }
 
+    // Eliminar una factura
     @DeleteMapping("/{id}")
-    fun delete(@PathVariable id: Long): Any{
+    fun deleteInvoice(@PathVariable id: Long): ResponseEntity<Any> {
         return try {
             invoiceService.deleteInvoice(id)
-            SuccessResponse(data = "Invoice eliminado correctamente")
-        }catch (e: Exception) {
-            ErrorResponse(message = "Erro al eliminar el invoice", code = 500)
+            ResponseEntity(SuccessResponse(data = "Factura eliminada correctamente"), HttpStatus.OK)
+        } catch (e: EntityNotFoundException) {
+            ResponseEntity(FailResponse(data = e.message ?: "Factura no encontrada"), HttpStatus.NOT_FOUND)
+        } catch (e: Exception) {
+            ResponseEntity(ErrorResponse(message = "Error al eliminar la factura", code = 500), HttpStatus.INTERNAL_SERVER_ERROR)
         }
     }
 }

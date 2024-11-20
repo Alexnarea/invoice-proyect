@@ -1,9 +1,11 @@
 package com.example.invoice_proyect.controller
 import com.example.invoice_proyect.dto.ClientDto
+import com.example.invoice_proyect.entity.Invoice
 import com.example.invoice_proyect.response.ErrorResponse
 import com.example.invoice_proyect.response.FailResponse
 import com.example.invoice_proyect.response.SuccessResponse
 import com.example.invoice_proyect.service.ClientService
+import jakarta.persistence.EntityNotFoundException
 import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -18,9 +20,9 @@ class ClientController {
     lateinit var clientService: ClientService
 
     @GetMapping
-    fun getAllClient(): ResponseEntity<Any>{
+    fun findAll(): ResponseEntity<Any>{
         return try {
-            val client = clientService.getAllClient()
+            val client = clientService.findAll()
             client?.let {
                 ResponseEntity(SuccessResponse(data = client), HttpStatus.OK)
             }?: ResponseEntity(FailResponse(data = "Clientes no encontrados"), HttpStatus.NOT_FOUND)
@@ -30,14 +32,30 @@ class ClientController {
     }
 
     @GetMapping("/{id}")
-    fun getClientById(@PathVariable id: Long): Any{
+    fun findById(@PathVariable id: Long): ResponseEntity<Any> {
         return try {
-            val client = clientService.getClientById(id)
-            client?.let {
-                SuccessResponse(data = client)
-            } ?: FailResponse(data = "Trabajador no encontrado")
+            val client = clientService.findById(id)
+            ResponseEntity(SuccessResponse(data = client), HttpStatus.OK)
+        } catch (e: EntityNotFoundException) {
+            ResponseEntity(FailResponse(data = e.message ?: "Cliente no encontrado"), HttpStatus.NOT_FOUND)
         } catch (e: Exception) {
-            ErrorResponse(message = "Error al obtener el cliente", code = 500)
+            ResponseEntity(ErrorResponse(message = "Error al obtener el cliente", code = 500), HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+    }
+
+    @GetMapping("/{id}/invoices")
+    fun findInvoicesByClientId(@PathVariable id: Long): ResponseEntity<Any> {
+        return try {
+            val invoices = clientService.findInvoicesByClientId(id)
+            if (invoices.isNotEmpty()) {
+                ResponseEntity(SuccessResponse(data = invoices), HttpStatus.OK)
+            } else {
+                ResponseEntity(FailResponse(data = "No se encontraron facturas para el cliente con ID $id"), HttpStatus.NOT_FOUND)
+            }
+        } catch (e: EntityNotFoundException) {
+            ResponseEntity(FailResponse(data = e.message ?: "Cliente no encontrado"), HttpStatus.NOT_FOUND)
+        } catch (e: Exception) {
+            ResponseEntity(ErrorResponse(message = "Error al obtener las facturas del cliente", code = 500), HttpStatus.INTERNAL_SERVER_ERROR)
         }
     }
 
@@ -62,12 +80,14 @@ class ClientController {
     }
 
     @DeleteMapping("/{id}")
-    fun delete(@PathVariable id: Long): Any {
+    fun delete(@PathVariable id: Long): ResponseEntity<Any> {
         return try {
             clientService.deleteClient(id)
-            SuccessResponse(data = "Cliente eliminado correctamente")
-        }  catch (e: Exception){
-            ErrorResponse(message = "Error al eliminar el cliente", code = 500)
+            ResponseEntity(SuccessResponse(data = "Cliente eliminado correctamente"), HttpStatus.OK)
+        } catch (e: EntityNotFoundException) {
+            ResponseEntity(FailResponse(data = e.message ?: "Cliente no encontrado"), HttpStatus.NOT_FOUND)
+        } catch (e: Exception) {
+            ResponseEntity(ErrorResponse(message = "Error al eliminar el cliente", code = 500), HttpStatus.INTERNAL_SERVER_ERROR)
         }
     }
 }

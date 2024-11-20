@@ -23,37 +23,39 @@ class InvoiceService {
     lateinit var invoiceMapper: InvoiceMapper
 
 
-    fun getAllInvoices(): List<InvoiceDto> {
+    fun findAll(): List<InvoiceDto> {
         val invoices = invoiceRepository.findAll()
         return invoices.map {invoiceMapper.toDto(it)}
     }
 
-    fun getInvoiceById(id:Long): InvoiceDto {
+    fun findById(id:Long): InvoiceDto {
         val invoice = invoiceRepository.findById(id)
             .orElseThrow {EntityNotFoundException("Invoice with id $id not found") }
         return invoiceMapper.toDto(invoice)
     }
 
-    fun save (invoiceDto: InvoiceDto): InvoiceDto {
+    fun save(invoiceDto: InvoiceDto): InvoiceDto {
         val client = clientRepository.findById(invoiceDto.clientId!!)
-            .orElseThrow { EntityNotFoundException("Client not found with id: ${invoiceDto.clientId}") }
+            .orElseThrow { EntityNotFoundException("Client not found with ID: ${invoiceDto.clientId}") }
         val invoice = invoiceMapper.toEntity(invoiceDto, client)
-        val savedInvoice = invoiceRepository.save(invoice)
-        return invoiceMapper.toDto(savedInvoice)
+        return invoiceMapper.toDto(invoiceRepository.save(invoice))
     }
 
-    fun updateInvoice(id: Long, invoiceDto: InvoiceDto): InvoiceDto{
+    fun updateInvoice(id: Long, invoiceDto: InvoiceDto): InvoiceDto {
         val invoice = invoiceRepository.findById(id)
-            .orElseThrow { EntityNotFoundException("Invoice not found with id $id ")}
+            .orElseThrow { EntityNotFoundException("Invoice not found with ID $id") }
+
+        // Actualizar los campos permitidos
         invoice.code = invoiceDto.code
         invoice.total = invoiceDto.total
-        val updateInvoice = invoiceRepository.save(invoice)
-        return invoiceMapper.toDto(updateInvoice)
+
+        return invoiceMapper.toDto(invoiceRepository.save(invoice))
     }
 
     fun deleteInvoice(id: Long) {
-        val invoice = invoiceRepository.findById(id)
-            .orElseThrow { EntityNotFoundException("Invoice not found with id $id")}
-        invoiceRepository.delete(invoice)
+        if (!invoiceRepository.existsById(id)) {
+            throw EntityNotFoundException("Invoice not found with ID $id")
+        }
+        invoiceRepository.deleteById(id)
     }
 }
