@@ -34,9 +34,6 @@ class LeadService {
         return leadMapper.toDto(lead)
     }
 
-    fun findActivityByLeadId(id: Long): List<Activity> {
-        return activityRepository.findByLeadId(id) ?: emptyList()
-    }
 
     // Guardar un nuevo lead
     fun save(leadDto: LeadDto): LeadDto {

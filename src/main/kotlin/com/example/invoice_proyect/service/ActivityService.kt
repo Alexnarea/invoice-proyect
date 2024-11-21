@@ -1,6 +1,7 @@
 package com.example.invoice_proyect.service
 
 import com.example.invoice_proyect.dto.ActivityDto
+import com.example.invoice_proyect.entity.Activity
 import com.example.invoice_proyect.mapper.ActivityMappper
 import com.example.invoice_proyect.repository.ActivityRepository
 import com.example.invoice_proyect.repository.LeadRepository
@@ -33,6 +34,9 @@ class ActivityService {
         return activityMapper.toDto(activity)
     }
 
+    fun findActivityByLeadId(id: Long): List<Activity> {
+        return activityRepository.findByLeadId(id) ?: emptyList()
+    }
     // Guardar una nueva actividad
     fun save(activityDto: ActivityDto): ActivityDto {
         val lead = leadRepository.findById(activityDto.leadId!!)

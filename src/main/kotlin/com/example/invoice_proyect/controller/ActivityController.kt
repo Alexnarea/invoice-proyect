@@ -43,6 +43,21 @@ class ActivityController {
         }
     }
 
+    @GetMapping("/{id}/activitys")
+    fun findActivityByLeadId(@PathVariable id: Long): ResponseEntity<Any> {
+        return try {
+            val lead =activityService.findActivityByLeadId(id)
+            if (lead.isNotEmpty()) {
+                ResponseEntity(SuccessResponse(data = lead), HttpStatus.OK)
+            } else {
+                ResponseEntity(FailResponse(data = "No se encontraron actividades para el cliente con ID $id"), HttpStatus.NOT_FOUND)
+            }
+        } catch (e: EntityNotFoundException) {
+            ResponseEntity(FailResponse(data = e.message ?: "Actividades no encontradas"), HttpStatus.NOT_FOUND)
+        } catch (e: Exception) {
+            ResponseEntity(ErrorResponse(message = "Error al obtener las actividades", code = 500), HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+    }
     // Crear una nueva actividad
     @PostMapping
     fun createActivity(@RequestBody @Valid activityDto: ActivityDto): ResponseEntity<Any> {
