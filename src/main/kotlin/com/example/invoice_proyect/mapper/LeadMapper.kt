@@ -1,3 +1,4 @@
+package com.example.invoice_proyect.mapper
 import com.example.invoice_proyect.dto.LeadDto
 import com.example.invoice_proyect.entity.Lead
 import org.springframework.stereotype.Component

@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface ActivityRepository: JpaRepository<Activity, Long> {
-    fun findByClientId(leadId: Long): List<Activity>
+    fun findByLeadId(leadId: Long): List<Activity>
 
 }
