@@ -6,6 +6,5 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface InvoiceRepository: JpaRepository<Invoice, Long> {
-    fun findById(id: Long?): Invoice?
     fun findByClientId(clientId: Long): List<Invoice>
 }

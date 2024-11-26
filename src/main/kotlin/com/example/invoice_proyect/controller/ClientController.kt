@@ -1,6 +1,5 @@
 package com.example.invoice_proyect.controller
 import com.example.invoice_proyect.dto.ClientDto
-import com.example.invoice_proyect.entity.Invoice
 import com.example.invoice_proyect.response.ErrorResponse
 import com.example.invoice_proyect.response.FailResponse
 import com.example.invoice_proyect.response.SuccessResponse

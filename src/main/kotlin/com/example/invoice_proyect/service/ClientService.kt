@@ -1,7 +1,6 @@
 package com.example.invoice_proyect.service
 
 import com.example.invoice_proyect.dto.ClientDto
-import com.example.invoice_proyect.entity.Client
 import com.example.invoice_proyect.entity.Invoice
 import com.example.invoice_proyect.mapper.ClientMapper
 import com.example.invoice_proyect.repository.ClientRepository
@@ -9,8 +8,6 @@ import com.example.invoice_proyect.repository.InvoiceRepository
 import jakarta.persistence.EntityNotFoundException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.util.*
-
 @Service
 class ClientService {
     @Autowired
@@ -48,7 +45,6 @@ class ClientService {
     fun updateClient(id: Long, clientDto: ClientDto): ClientDto {
         val client = clientRepository.findById(id)
             .orElseThrow { EntityNotFoundException("Client with ID $id not found") }
-
         client.apply {
             fullName = clientDto.fullName
             age = clientDto.age
@@ -62,8 +58,7 @@ class ClientService {
 
     fun deleteClient(id: Long) {
         val client = clientRepository.findById(id)
-            .orElseThrow{ EntityNotFoundException("Could not find client with id: $id")
-            }
+            .orElseThrow{ EntityNotFoundException("Could not find client with id: $id") }
         clientRepository.delete(client)
     }
 }

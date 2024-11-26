@@ -7,7 +7,6 @@ class InvoiceDto {
 
     var id: Long? = null
 
-
     @NotNull(message = "Code is required")
     var code: String? = null
 

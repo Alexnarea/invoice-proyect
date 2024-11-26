@@ -1,5 +1,6 @@
 package com.example.invoice_proyect.controller
 
+import com.example.invoice_proyect.dto.ClientDto
 import com.example.invoice_proyect.dto.LeadDto
 import com.example.invoice_proyect.entity.Lead
 import com.example.invoice_proyect.response.ErrorResponse
@@ -43,6 +44,22 @@ class LeadController {
             ResponseEntity(FailResponse(data = e.message ?: "Lead no encontrado"), HttpStatus.NOT_FOUND)
         } catch (e: Exception) {
             ResponseEntity(ErrorResponse(message = "Error al obtener el lead", code = 500), HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+    }
+
+    @GetMapping("/{id}/invoices")
+    fun findActivityByLeadId(@PathVariable id: Long): ResponseEntity<Any> {
+        return try {
+            val activities = leadService.findActivityByLeadId(id)
+            if (activities.isNotEmpty()) {
+                ResponseEntity(SuccessResponse(data = activities), HttpStatus.OK)
+            } else {
+                ResponseEntity(FailResponse(data = "No se encontraron actividades para el lead con ID $id"), HttpStatus.NOT_FOUND)
+            }
+        } catch (e: EntityNotFoundException) {
+            ResponseEntity(FailResponse(data = e.message ?: "lead no encontrado"), HttpStatus.NOT_FOUND)
+        } catch (e: Exception) {
+            ResponseEntity(ErrorResponse(message = "Error al obtener las actividades del lead", code = 500), HttpStatus.INTERNAL_SERVER_ERROR)
         }
     }
 

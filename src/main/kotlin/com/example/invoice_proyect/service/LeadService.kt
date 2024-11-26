@@ -1,7 +1,6 @@
 package com.example.invoice_proyect.service
 import com.example.invoice_proyect.dto.LeadDto
 import com.example.invoice_proyect.entity.Activity
-import com.example.invoice_proyect.entity.Invoice
 import com.example.invoice_proyect.mapper.LeadMapper
 import com.example.invoice_proyect.repository.ActivityRepository
 import com.example.invoice_proyect.repository.LeadRepository
@@ -34,6 +33,10 @@ class LeadService {
         return leadMapper.toDto(lead)
     }
 
+    fun findActivityByLeadId(id: Long): List<Activity> {
+        return activityRepository.findByLeadId(id) ?: emptyList()
+    }
+
 
     // Guardar un nuevo lead
     fun save(leadDto: LeadDto): LeadDto {
@@ -46,15 +49,9 @@ class LeadService {
     fun updateLead(id: Long, leadDto: LeadDto): LeadDto {
         val lead = leadRepository.findById(id)
             .orElseThrow { EntityNotFoundException("Lead with ID $id not found") }
-
-        lead.apply {
-            name = leadDto.name
-            email = leadDto.email
-            phone = leadDto.phone
-            status = leadDto.status
-            updatedAt = leadDto.updatedAt ?: updatedAt // Si updatedAt es null, mantiene el valor actual
-        }
-
+            lead.name = leadDto.name
+            lead.email = leadDto.email
+            lead.phone = leadDto.phone
         val updatedLead = leadRepository.save(lead)
         return leadMapper.toDto(updatedLead)
     }

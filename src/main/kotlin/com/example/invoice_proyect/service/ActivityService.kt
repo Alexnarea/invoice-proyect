@@ -1,5 +1,4 @@
 package com.example.invoice_proyect.service
-
 import com.example.invoice_proyect.dto.ActivityDto
 import com.example.invoice_proyect.entity.Activity
 import com.example.invoice_proyect.mapper.ActivityMappper
@@ -35,34 +34,22 @@ class ActivityService {
     }
 
     fun findActivityByLeadId(id: Long): List<Activity> {
-        return activityRepository.findByLeadId(id) ?: emptyList()
+        return activityRepository.findByLeadId(id)
     }
     // Guardar una nueva actividad
     fun save(activityDto: ActivityDto): ActivityDto {
         val lead = leadRepository.findById(activityDto.leadId!!)
             .orElseThrow { EntityNotFoundException("Lead not found with ID: ${activityDto.leadId}") }
-        val activity = activityMapper.toEntity(activityDto)
-        activity.lead = lead // Asignar el lead a la actividad
-        val savedActivity = activityRepository.save(activity)
-        return activityMapper.toDto(savedActivity)
+        val activity = activityMapper.toEntity(activityDto, lead)
+        return activityMapper.toDto(activityRepository.save(activity))
     }
 
     // Actualizar una actividad existente
     fun updateActivity(id: Long, activityDto: ActivityDto): ActivityDto {
         val activity = activityRepository.findById(id)
             .orElseThrow { EntityNotFoundException("Activity not found with ID $id") }
-
-        // Actualizar los campos permitidos
-        activity.apply {
-            type = activityDto.type
-            description = activityDto.description
-            scheduledAt = activityDto.scheduledAt
-            status = activityDto.status
-            updatedAt = activityDto.updatedAt ?: updatedAt // Si updatedAt es null, mantiene el valor actual
-        }
-
-        val updatedActivity = activityRepository.save(activity)
-        return activityMapper.toDto(updatedActivity)
+            activity.description = activityDto.description
+        return activityMapper.toDto(activityRepository.save(activity))
     }
 
     // Eliminar una actividad
